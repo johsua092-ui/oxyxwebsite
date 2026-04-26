@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logApiRequest, incrementEndpointHits } from "./supabase";
 
 /**
  * Standard API response format matching siputzx style:
@@ -27,15 +28,44 @@ export function apiError(message: string, statusCode = 500) {
 }
 
 /**
+ * Log a request to Supabase (fire-and-forget, won't block response)
+ */
+function logToSupabase(
+  request: Request,
+  endpoint: string,
+  statusCode: number,
+  responseTimeMs: number,
+  errorMessage?: string
+) {
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+
+  // Fire and forget - don't await
+  logApiRequest({
+    endpoint,
+    method: request.method,
+    status_code: statusCode,
+    response_time_ms: responseTimeMs,
+    user_agent: userAgent,
+    ip_address: ip,
+    error_message: errorMessage,
+  }).catch(() => {});
+
+  incrementEndpointHits(endpoint).catch(() => {});
+}
+
+/**
  * Proxy a request to an external API and return the response
  * in the standard Oxyx format with metadata.
  */
 export async function proxyRequest(
+  request: Request,
   externalUrl: string,
   endpointName: string,
   model?: string
 ): Promise<NextResponse> {
   const startTime = Date.now();
+  const endpointPath = new URL(request.url).pathname;
 
   try {
     const res = await fetch(externalUrl, {
@@ -45,15 +75,19 @@ export async function proxyRequest(
       },
     });
 
+    const elapsed = Date.now() - startTime;
+
     if (!res.ok) {
+      logToSupabase(request, endpointPath, 502, elapsed, `Upstream ${res.status}`);
       return apiError(`Upstream returned ${res.status}`, 502);
     }
 
     const upstream = await res.json();
-    const elapsed = Date.now() - startTime;
 
     // Extract the actual data from upstream response
     const result = upstream.data || upstream.result || upstream;
+
+    logToSupabase(request, endpointPath, 200, elapsed);
 
     return apiSuccess({
       ...( typeof result === "string" ? { message: result } : result ),
@@ -68,6 +102,8 @@ export async function proxyRequest(
       },
     });
   } catch {
+    const elapsed = Date.now() - startTime;
+    logToSupabase(request, endpointPath, 502, elapsed, "Upstream unreachable");
     return apiError("Failed to fetch data from upstream", 502);
   }
 }

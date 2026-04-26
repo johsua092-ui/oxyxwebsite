@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   if ("error" in param) return param.error;
 
   return proxyRequest(
+    request,
     `https://api.siputzx.my.id/api/tools/shortlink?url=${encodeURIComponent(param.value)}`,
     "url-shortener"
   );

@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   if ("error" in param) return param.error;
 
   return proxyRequest(
+    request,
     `https://api.siputzx.my.id/api/d/ytmp4?url=${encodeURIComponent(param.value)}`,
     "youtube-downloader"
   );
