@@ -79,8 +79,8 @@ export default function HomePage() {
             <span>All systems operational</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[1.05] mb-8 uppercase">
-            <span className="text-white">No Login. No Key.</span>
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[1.05] mb-8 uppercase fade-in-up">
+            <span className="text-white hover-glow">No Login. No Key.</span>
             <br />
             <span className="text-gradient">Just Pure API.</span>
           </h1>
@@ -104,7 +104,7 @@ export default function HomePage() {
       {/* ---- Stats Bar ---- */}
       <section className="relative z-10 -mt-16 mb-24 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="surface-elevated rounded-sm grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.04]">
+          <div className="surface-elevated rounded-sm grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.04] shimmer glow-pulse">
             {STATS.map((stat) => (
               <div key={stat.label} className="px-6 py-8 text-center">
                 <p className="text-2xl md:text-3xl font-black text-white mb-1 uppercase">{stat.value}</p>
@@ -131,7 +131,7 @@ export default function HomePage() {
           </div>
 
           <div className="scene">
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6 stagger">
               {FEATURES.map((feature, i) => (
                 <TiltCard
                   key={i}

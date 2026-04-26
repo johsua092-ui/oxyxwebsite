@@ -10,8 +10,8 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #080b14;
-  color: #a0a0a0;
+  background: #0a0e18;
+  color: #b0b5c0;
 }
 
 /* ---- Scene & Perspective ---- */
@@ -24,13 +24,13 @@ body {
 /* ---- Gradient Surfaces ---- */
 
 .surface-dark {
-  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(120,0,0,0.06) 0%, transparent 60%),
-              #080b14;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(150,20,20,0.07) 0%, transparent 60%),
+              #0a0e18;
 }
 
 .surface-elevated {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.07);
   backdrop-filter: blur(20px);
 }
 
@@ -382,12 +382,12 @@ body {
 
 .marquee-container::before {
   left: 0;
-  background: linear-gradient(90deg, #080b14, transparent);
+  background: linear-gradient(90deg, #0a0e18, transparent);
 }
 
 .marquee-container::after {
   right: 0;
-  background: linear-gradient(270deg, #080b14, transparent);
+  background: linear-gradient(270deg, #0a0e18, transparent);
 }
 
 .marquee-track {
@@ -481,4 +481,106 @@ body {
   .marquee-outline-text {
     -webkit-text-stroke: 1px rgba(255,255,255,0.08);
   }
+}
+
+/* ---- Shimmer Effect ---- */
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* ---- Glow Pulse ---- */
+
+.glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.05); }
+  50% { box-shadow: 0 0 40px rgba(255,0,0,0.12); }
+}
+
+/* ---- Fade In Up ---- */
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Stagger children ---- */
+
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* ---- Text glow on hover ---- */
+
+.hover-glow:hover {
+  text-shadow: 0 0 20px rgba(255,0,0,0.3);
+  transition: text-shadow 0.3s ease;
+}
+
+/* ---- Gradient border animated ---- */
+
+.border-glow {
+  position: relative;
+}
+
+.border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,0,0,0.2), transparent, rgba(255,0,0,0.1));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.border-glow:hover::before {
+  opacity: 1;
+}
+
+/* ---- Live indicator blink ---- */
+
+.live-blink {
+  animation: live-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes live-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
