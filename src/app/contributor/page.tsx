@@ -42,10 +42,10 @@ export default function ContributorPage() {
         <div className="surface-elevated rounded-2xl p-8 text-center">
           <h2 className="text-xl font-semibold text-white mb-3">Want to Contribute?</h2>
           <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
-            We welcome code contributions, documentation improvements, and bug reports.
+            We welcome new contributors. Reach out to us to get involved with development.
           </p>
-          <a href="#" className="btn-accent inline-block text-xs px-6 py-3">
-            Contribute on GitHub
+          <a href="/support" className="btn-accent inline-block text-xs px-6 py-3">
+            Contact Us
           </a>
         </div>
       </main>

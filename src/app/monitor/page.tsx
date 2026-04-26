@@ -4,32 +4,28 @@ import Footer from "@/components/Footer";
 import MonitorClient from "./MonitorClient";
 
 export const metadata: Metadata = {
-  title: "API Status & Monitoring",
-  description: "Real-time monitoring dashboard for OXYX API. View uptime, response times, and system health.",
+  title: "System Monitor - OXYX API",
+  description: "Real-time system monitoring for OXYX API. Track uptime, CPU, memory, and request metrics.",
 };
 
 export default function MonitorPage() {
   return (
     <div className="surface-dark min-h-screen">
       <Navbar />
-
-      <main className="max-w-7xl mx-auto px-6 pt-24 pb-16">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-[0.2em] mb-2">
-              System Health
-            </p>
-            <h1 className="text-3xl md:text-4xl font-bold text-display">API Monitoring</h1>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="dot-online pulse-ring" />
-            Live Dashboard
-          </div>
+      <main className="max-w-6xl mx-auto px-6 pt-28 pb-20">
+        <div className="text-center mb-12">
+          <p className="section-label mb-4">
+            System Monitor
+          </p>
+          <h1 className="text-3xl md:text-5xl font-black text-white uppercase mb-2">
+            Realtime Status
+          </h1>
+          <p className="text-sm text-gray-600">
+            Live server metrics refreshed every 2 seconds
+          </p>
         </div>
-
         <MonitorClient />
       </main>
-
       <Footer />
     </div>
   );

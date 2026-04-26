@@ -4,46 +4,48 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TiltCard from "@/components/TiltCard";
+import Marquee from "@/components/Marquee";
+
+const MARQUEE_CATEGORIES = [
+  "AI", "DOWNLOADER", "SEARCH", "TOOLS", "RANDOM", "INFO", "ANIME", "GAMES",
+];
 
 const FEATURES = [
   {
+    title: "No Registration",
+    description: "Access all endpoints without creating an account. No API keys, no signup forms, no barriers.",
+    icon: (
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    ),
+  },
+  {
     title: "Lightning Fast",
-    description: "Sub-100ms response times powered by edge computing. Every millisecond counts when you're building at scale.",
+    description: "Sub-100ms response times powered by edge computing. Built for speed at every layer of the stack.",
     icon: (
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
     ),
-    color: "from-blue-500 to-cyan-400",
   },
   {
-    title: "Zero Configuration",
-    description: "No API keys, no registration, no setup. Just call the endpoint and get your data. We believe in simplicity.",
+    title: "Always Online",
+    description: "99.9% uptime with real-time monitoring. We keep the infrastructure running so you can focus on building.",
     icon: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     ),
-    color: "from-violet-500 to-purple-400",
-  },
-  {
-    title: "Auto Scaling",
-    description: "Infrastructure that grows with your traffic. Handle 10 or 10 million requests without changing a single line of code.",
-    icon: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    ),
-    color: "from-emerald-500 to-teal-400",
   },
 ] as const;
 
 const FAQ_ITEMS = [
   {
     question: "Is this API service completely free?",
-    answer: "Yes. No hidden costs, no rate limits for basic usage, and no registration required. We sustain the project through optional donations and premium tiers.",
+    answer: "Yes. No hidden costs, no rate limits for basic usage, and no registration required. We sustain the project through optional donations.",
   },
   {
     question: "Do I need an API key to get started?",
-    answer: "No. All public endpoints are accessible without authentication. Premium endpoints with higher limits can be unlocked with an optional API key.",
+    answer: "No. All public endpoints are accessible without authentication. Just call the endpoint and get your data.",
   },
   {
     question: "How can I support the project?",
-    answer: "Visit the donation page to contribute directly, star the repository on GitHub, or submit code contributions. Every form of support helps us keep the service running.",
+    answer: "Visit the donation page to contribute directly, or submit code contributions. Every form of support helps us keep the service running.",
   },
   {
     question: "What uptime can I expect?",
@@ -68,31 +70,31 @@ export default function HomePage() {
       {/* ---- Hero ---- */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="grid-bg absolute inset-0" />
-        <div className="orb w-[500px] h-[500px] bg-blue-600/30 -top-40 -right-40 absolute" />
-        <div className="orb w-[400px] h-[400px] bg-indigo-600/20 -bottom-32 -left-32 absolute" />
+        <div className="orb w-[600px] h-[600px] bg-red-600/20 -top-60 -right-60 absolute" />
+        <div className="orb w-[400px] h-[400px] bg-red-900/15 -bottom-40 -left-40 absolute" />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.08] text-sm text-gray-400 mb-10">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-white/[0.03] border border-white/[0.06] text-xs text-gray-500 uppercase tracking-widest mb-10">
             <span className="dot-online pulse-ring" />
             <span>All systems operational</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-8">
-            <span className="text-display">Build Smarter.</span>
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[1.05] mb-8 uppercase">
+            <span className="text-white">No Login. No Key.</span>
             <br />
-            <span className="text-gradient">Scale Faster.</span>
+            <span className="text-gradient">Just Pure API.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-12">
-            A production-ready API platform with 150+ endpoints. No keys, no
-            registration, no limits. Just clean, fast responses.
+          <p className="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-12">
+            A production-ready API platform with 150+ endpoints.
+            No keys, no registration, no limits. Just clean, fast responses.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/get/documentation" className="btn-accent px-8 py-4 text-base">
-              Explore API
+            <a href="/get/documentation" className="btn-accent px-8 py-4 text-sm">
+              Go to Playground
             </a>
-            <a href="/monitor" className="btn-ghost px-8 py-4 text-base">
+            <a href="/monitor" className="btn-ghost px-8 py-4 text-sm">
               View Status
             </a>
           </div>
@@ -102,29 +104,29 @@ export default function HomePage() {
       {/* ---- Stats Bar ---- */}
       <section className="relative z-10 -mt-16 mb-24 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="surface-elevated rounded-2xl shadow-depth-lg grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.04]">
+          <div className="surface-elevated rounded-sm grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.04]">
             {STATS.map((stat) => (
               <div key={stat.label} className="px-6 py-8 text-center">
-                <p className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</p>
-                <p className="text-xs text-gray-500 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-2xl md:text-3xl font-black text-white mb-1 uppercase">{stat.value}</p>
+                <p className="text-[10px] text-gray-600 uppercase tracking-[0.2em]">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ---- Features ---- */}
+      {/* ---- Why Choose Section ---- */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold text-blue-400 uppercase tracking-[0.2em] mb-4">
-              Core Features
+            <p className="section-label mb-4">
+              Why Choose
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-display mb-4">
-              Engineered for Performance
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 uppercase">
+              Why <span className="highlight-block">OXYX</span>
             </h2>
-            <p className="text-gray-500 max-w-xl mx-auto">
-              Every component is built with reliability and speed as the foundation.
+            <p className="text-gray-600 max-w-xl mx-auto text-sm">
+              Built with reliability and speed as the foundation. No compromises.
             </p>
           </div>
 
@@ -133,16 +135,16 @@ export default function HomePage() {
               {FEATURES.map((feature, i) => (
                 <TiltCard
                   key={i}
-                  className="card-3d rounded-2xl p-8"
+                  className="card-3d rounded-xl p-8"
                   intensity={6}
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg`}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 rounded-lg bg-red-600/10 border border-red-600/20 flex items-center justify-center mb-6">
+                    <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       {feature.icon}
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-bold text-white mb-3 uppercase tracking-wide">{feature.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{feature.description}</p>
                 </TiltCard>
               ))}
             </div>
@@ -150,53 +152,61 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---- Code Preview ---- */}
+      {/* ---- Background Marquee ---- */}
+      <section className="py-6 relative z-0">
+        <Marquee items={MARQUEE_CATEGORIES} variant="outline" direction="left" />
+        <div className="mt-3">
+          <Marquee items={MARQUEE_CATEGORIES} variant="outline" direction="right" />
+        </div>
+      </section>
+
+      {/* ---- Endpoint Catalog Preview ---- */}
       <section className="py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-violet-400 uppercase tracking-[0.2em] mb-4">
+            <p className="section-label mb-4">
               Developer Experience
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-display">
+            <h2 className="text-3xl md:text-5xl font-black text-white uppercase">
               Three Lines. That&apos;s It.
             </h2>
           </div>
 
-          <div className="surface-elevated rounded-2xl shadow-depth-lg overflow-hidden">
+          <div className="surface-elevated rounded-sm overflow-hidden">
             <div className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.04]">
               <div className="w-3 h-3 rounded-full bg-red-500/60" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
               <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              <span className="ml-3 text-xs text-gray-600 font-mono">request.ts</span>
+              <span className="ml-3 text-xs text-gray-600 font-mono uppercase tracking-wider">request.ts</span>
             </div>
             <pre className="p-6 text-sm font-mono leading-8 overflow-x-auto">
               <code>
-                <span className="text-violet-400">const</span>{" "}
-                <span className="text-blue-300">response</span>{" "}
-                <span className="text-gray-500">=</span>{" "}
-                <span className="text-violet-400">await</span>{" "}
+                <span className="text-red-400">const</span>{" "}
+                <span className="text-gray-300">response</span>{" "}
+                <span className="text-gray-600">=</span>{" "}
+                <span className="text-red-400">await</span>{" "}
                 <span className="text-yellow-300">fetch</span>
-                <span className="text-gray-400">(</span>
+                <span className="text-gray-500">(</span>
                 <span className="text-green-400">&apos;https://api.oxyx.my.id/api/ai/luminai?content=hello&apos;</span>
-                <span className="text-gray-400">)</span>
+                <span className="text-gray-500">)</span>
                 <br />
-                <span className="text-violet-400">const</span>{" "}
-                <span className="text-blue-300">data</span>{" "}
-                <span className="text-gray-500">=</span>{" "}
-                <span className="text-violet-400">await</span>{" "}
-                <span className="text-blue-300">response</span>
-                <span className="text-gray-400">.</span>
+                <span className="text-red-400">const</span>{" "}
+                <span className="text-gray-300">data</span>{" "}
+                <span className="text-gray-600">=</span>{" "}
+                <span className="text-red-400">await</span>{" "}
+                <span className="text-gray-300">response</span>
+                <span className="text-gray-500">.</span>
                 <span className="text-yellow-300">json</span>
-                <span className="text-gray-400">()</span>
+                <span className="text-gray-500">()</span>
                 <br />
-                <span className="text-blue-300">console</span>
-                <span className="text-gray-400">.</span>
+                <span className="text-gray-300">console</span>
+                <span className="text-gray-500">.</span>
                 <span className="text-yellow-300">log</span>
-                <span className="text-gray-400">(</span>
-                <span className="text-blue-300">data</span>
-                <span className="text-gray-400">.</span>
-                <span className="text-blue-300">result</span>
-                <span className="text-gray-400">)</span>
+                <span className="text-gray-500">(</span>
+                <span className="text-gray-300">data</span>
+                <span className="text-gray-500">.</span>
+                <span className="text-gray-300">result</span>
+                <span className="text-gray-500">)</span>
               </code>
             </pre>
           </div>
@@ -207,10 +217,10 @@ export default function HomePage() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-[0.2em] mb-4">
+            <p className="section-label mb-4">
               FAQ
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-display">
+            <h2 className="text-3xl md:text-5xl font-black text-white uppercase">
               Common Questions
             </h2>
           </div>
@@ -223,9 +233,9 @@ export default function HomePage() {
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
               >
                 <div className="flex justify-between items-center gap-4">
-                  <h3 className="text-base font-medium text-gray-200">{faq.question}</h3>
+                  <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{faq.question}</h3>
                   <svg
-                    className="accordion-icon w-5 h-5 text-gray-500 flex-shrink-0"
+                    className="accordion-icon w-5 h-5 text-gray-600 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -234,7 +244,7 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <div className="accordion-body">
-                  <p className="pt-4 text-sm text-gray-500 leading-relaxed">{faq.answer}</p>
+                  <p className="pt-4 text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
                 </div>
               </div>
             ))}
@@ -245,13 +255,13 @@ export default function HomePage() {
       {/* ---- CTA ---- */}
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-display mb-6">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-6 uppercase">
             Ready to Build?
           </h2>
-          <p className="text-gray-500 mb-10 max-w-lg mx-auto">
+          <p className="text-gray-600 mb-10 max-w-lg mx-auto text-sm">
             Start integrating in minutes. No sign-up required.
           </p>
-          <a href="/get/documentation" className="btn-accent inline-block px-10 py-4 text-base">
+          <a href="/get/documentation" className="btn-accent inline-block px-10 py-4 text-sm">
             Read the Docs
           </a>
         </div>

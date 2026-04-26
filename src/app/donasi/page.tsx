@@ -87,11 +87,11 @@ export default function DonasiPage() {
         <div className="surface-elevated rounded-2xl p-8 text-center">
           <h3 className="text-lg font-semibold text-white mb-3">Other Ways to Support</h3>
           <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
-            Star the repository, share the project, or submit pull requests. Open source thrives on community.
+            Spread the word to fellow developers, report bugs, or suggest new features. Community support keeps OXYX alive.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a href="#" className="btn-accent text-xs px-6 py-3">Star on GitHub</a>
-            <button className="btn-ghost text-xs px-6 py-3">Share Project</button>
+            <a href="/support" className="btn-accent text-xs px-6 py-3">Send Feedback</a>
+            <a href="/get/documentation" className="btn-ghost text-xs px-6 py-3">Explore API</a>
           </div>
         </div>
       </main>

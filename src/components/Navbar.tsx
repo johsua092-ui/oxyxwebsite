@@ -5,9 +5,8 @@ import { useState, useEffect } from "react";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/get/documentation", label: "GET Docs" },
-  { href: "/post/documentation", label: "POST Docs" },
-  { href: "/monitor", label: "Status" },
+  { href: "/get/documentation", label: "Playground" },
+  { href: "/monitor", label: "Monitor" },
   { href: "/donasi", label: "Donate" },
 ] as const;
 
@@ -28,12 +27,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-lg font-bold text-gradient tracking-tight">OXYX</span>
+            <div className="w-2 h-6 bg-red-600" />
+            <span className="text-lg font-black text-white uppercase tracking-tight">
+              OXYX
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -41,11 +38,15 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-4 py-2 text-sm text-gray-400 hover:text-white rounded-lg hover:bg-white/[0.04] transition-all duration-200"
+                className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-white uppercase tracking-widest transition-colors duration-200"
               >
                 {link.label}
               </Link>
             ))}
+            <div className="flex items-center gap-2 ml-3 px-3 py-2">
+              <span className="dot-online pulse-ring" />
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Status</span>
+            </div>
           </div>
 
           <button
@@ -71,7 +72,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="block px-4 py-3 text-sm text-gray-400 hover:text-white rounded-lg hover:bg-white/[0.04] transition-all"
+                className="block px-4 py-3 text-xs font-semibold text-gray-500 hover:text-white uppercase tracking-widest transition-all"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
