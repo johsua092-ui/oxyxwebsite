@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 
 interface Endpoint {
   name: string;
@@ -34,6 +34,26 @@ export default function DocsClient({ method }: { method: "get" | "post" }) {
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [executing, setExecuting] = useState(false);
   const [responseTab, setResponseTab] = useState<"preview" | "headers" | "curl">("preview");
+  const [copied, setCopied] = useState(false);
+
+  const copyText = useCallback((text: string) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     fetch(`/api/${method}`)
@@ -285,13 +305,17 @@ export default function DocsClient({ method }: { method: "get" | "post" }) {
                             </div>
                             <div className="flex items-center gap-3">
                               <button
-                                onClick={() => navigator.clipboard.writeText(response.body)}
-                                className="text-[10px] text-gray-600 hover:text-white transition-colors"
+                                onClick={() => copyText(response.body)}
+                                className="text-[10px] text-gray-600 hover:text-white transition-colors flex items-center gap-1"
                                 title="Copy"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
+                                {copied ? (
+                                  <span className="text-emerald-400 text-[10px] font-bold">Copied!</span>
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  </svg>
+                                )}
                               </button>
                               <span className={`text-[10px] font-bold px-2 py-1 rounded ${
                                 response.status < 400 ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
