@@ -5,45 +5,42 @@ import { useEffect, useState, useCallback } from "react";
 interface SystemStats {
   totalRequests: number;
   dailyRequests: number;
-  requestsPerSecond: number;
-  totalEndpoints: number;
-  apiTotalRequests: number;
-  cpuUsage: string;
-  memoryUsage: string;
-  networkDown: string;
-  networkUp: string;
+  avgResponse: number;
+  activeEndpoints: number;
+  uniqueVisitors: number;
+  errorRate: string;
+  memoryUsage: number;
   uptime: string;
-  timestamp: string;
-  status: string;
+  uptimeSeconds: number;
 }
 
 const METRIC_CONFIG = [
   { key: "totalRequests", label: "Total Requests", color: "text-red-400", bar: "bg-red-500" },
-  { key: "dailyRequests", label: "Today", color: "text-amber-400", bar: "bg-amber-500" },
-  { key: "requestsPerSecond", label: "Req/sec", color: "text-emerald-400", bar: "bg-emerald-500" },
-  { key: "totalEndpoints", label: "Endpoints", color: "text-sky-400", bar: "bg-sky-500" },
-  { key: "cpuUsage", label: "CPU Usage", color: "text-orange-400", bar: "bg-orange-500" },
-  { key: "memoryUsage", label: "Memory", color: "text-violet-400", bar: "bg-violet-500" },
-  { key: "networkDown", label: "Download", color: "text-cyan-400", bar: "bg-cyan-500" },
-  { key: "networkUp", label: "Upload", color: "text-pink-400", bar: "bg-pink-500" },
+  { key: "dailyRequests", label: "Today Requests", color: "text-amber-400", bar: "bg-amber-500" },
+  { key: "avgResponse", label: "Avg Response (ms)", color: "text-emerald-400", bar: "bg-emerald-500" },
+  { key: "activeEndpoints", label: "Active Endpoints", color: "text-sky-400", bar: "bg-sky-500" },
+  { key: "uniqueVisitors", label: "Unique Visitors", color: "text-orange-400", bar: "bg-orange-500" },
+  { key: "errorRate", label: "Error Rate", color: "text-violet-400", bar: "bg-violet-500" },
+  { key: "memoryUsage", label: "Memory Usage (MB)", color: "text-cyan-400", bar: "bg-cyan-500" },
 ] as const;
 
 function formatValue(key: string, stats: SystemStats): string {
   const raw = stats[key as keyof SystemStats];
+  if (raw === undefined) return "0";
   if (typeof raw === "number") return raw.toLocaleString();
   return String(raw);
 }
 
 export default function MonitorClient() {
   const [stats, setStats] = useState<SystemStats>({
-    totalRequests: 0, dailyRequests: 0, requestsPerSecond: 0,
-    totalEndpoints: 0, apiTotalRequests: 0, cpuUsage: "0%",
-    memoryUsage: "0 MB", networkDown: "0 MB/s", networkUp: "0 KB/s",
-    uptime: "0h 0m", timestamp: "", status: "loading",
+    totalRequests: 0, dailyRequests: 0, avgResponse: 0,
+    activeEndpoints: 0, uniqueVisitors: 0, errorRate: "0%",
+    memoryUsage: 0, uptime: "99.9%", uptimeSeconds: 0,
   });
   const [clock, setClock] = useState("");
   const [lastUpdate, setLastUpdate] = useState("");
   const [history, setHistory] = useState<Array<{ time: string; rps: number }>>([]);
+  const [isOperational, setIsOperational] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -51,16 +48,19 @@ export default function MonitorClient() {
       if (res.ok) {
         const data = await res.json();
         setStats(data);
+        setIsOperational(true);
         setLastUpdate(new Date().toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta" }));
         setHistory((prev) => {
           const next = [...prev, {
             time: new Date().toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-            rps: data.requestsPerSecond,
+            rps: data.dailyRequests || 0, // Using daily as proxy since rps isn't in API yet
           }];
           return next.slice(-20);
         });
       }
-    } catch { /* server offline */ }
+    } catch { 
+      setIsOperational(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -83,10 +83,10 @@ export default function MonitorClient() {
       {/* Status Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div className="flex items-center gap-3">
-          <div className={`w-3 h-3 rounded-full ${stats.status === "operational" ? "bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]" : "bg-red-500"}`} />
+          <div className={`w-3 h-3 rounded-full ${isOperational ? "bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]" : "bg-red-500"}`} />
           <div>
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              {stats.status === "operational" ? "All Systems Operational" : "Checking..."}
+              {isOperational ? "All Systems Operational" : "Checking..."}
             </h2>
             {stats.uptime && (
               <p className="text-[10px] text-gray-600 uppercase tracking-widest mt-0.5">
@@ -154,26 +154,27 @@ export default function MonitorClient() {
       </div>
 
       {/* System Info */}
+      {/* System Info */}
       <div className="grid lg:grid-cols-2 gap-3">
         <div className="surface-elevated rounded-sm p-6">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Network Traffic</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">API Health</h3>
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest mb-1">
-                <span>Download</span>
-                <span className="text-cyan-400">{stats.networkDown}</span>
+                <span>Error Rate</span>
+                <span className="text-red-400">{stats.errorRate}</span>
               </div>
               <div className="w-full h-1.5 bg-white/[0.03] rounded-full overflow-hidden">
-                <div className="h-full bg-cyan-500/50 rounded-full transition-all duration-1000" style={{ width: "65%" }} />
+                <div className="h-full bg-red-500/50 rounded-full transition-all duration-1000" style={{ width: stats.errorRate === "0%" ? "0%" : (parseFloat(stats.errorRate) > 100 ? "100%" : stats.errorRate) }} />
               </div>
             </div>
             <div>
               <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest mb-1">
-                <span>Upload</span>
-                <span className="text-pink-400">{stats.networkUp}</span>
+                <span>Avg Response</span>
+                <span className="text-emerald-400">{stats.avgResponse} ms</span>
               </div>
               <div className="w-full h-1.5 bg-white/[0.03] rounded-full overflow-hidden">
-                <div className="h-full bg-pink-500/50 rounded-full transition-all duration-1000" style={{ width: "35%" }} />
+                <div className="h-full bg-emerald-500/50 rounded-full transition-all duration-1000" style={{ width: `${Math.min((stats.avgResponse / 2000) * 100, 100)}%` }} />
               </div>
             </div>
           </div>
@@ -183,20 +184,20 @@ export default function MonitorClient() {
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest mb-1">
-                <span>CPU</span>
-                <span className="text-orange-400">{stats.cpuUsage}</span>
+                <span>Memory Heap Usage</span>
+                <span className="text-violet-400">{stats.memoryUsage} MB</span>
               </div>
               <div className="w-full h-1.5 bg-white/[0.03] rounded-full overflow-hidden">
-                <div className="h-full bg-orange-500/50 rounded-full transition-all duration-1000" style={{ width: stats.cpuUsage }} />
+                <div className="h-full bg-violet-500/50 rounded-full transition-all duration-1000" style={{ width: `${Math.min((stats.memoryUsage / 512) * 100, 100)}%` }} />
               </div>
             </div>
             <div>
               <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest mb-1">
-                <span>Memory</span>
-                <span className="text-violet-400">{stats.memoryUsage}</span>
+                <span>Server Uptime</span>
+                <span className="text-sky-400">{Math.floor(stats.uptimeSeconds / 3600)}h {Math.floor((stats.uptimeSeconds % 3600) / 60)}m</span>
               </div>
               <div className="w-full h-1.5 bg-white/[0.03] rounded-full overflow-hidden">
-                <div className="h-full bg-violet-500/50 rounded-full transition-all duration-1000" style={{ width: "45%" }} />
+                <div className="h-full bg-sky-500/50 rounded-full transition-all duration-1000" style={{ width: "100%" }} />
               </div>
             </div>
           </div>
