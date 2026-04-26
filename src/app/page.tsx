@@ -146,26 +146,31 @@ export default function HomePage() {
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-white/[0.03] border border-white/[0.06] text-xs text-gray-500 uppercase tracking-widest mb-10 fade-in-up">
             <span className="dot-online pulse-ring" />
-            <span>All systems operational</span>
+            <span>System Operational. V.2.0.0</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-[1.05] mb-8 uppercase fade-in-up">
-            <span className="text-white hover-glow">No Login. No Key.</span>
+          <h1 className="text-5xl sm:text-7xl md:text-[5.5rem] font-black tracking-tight leading-[1.1] mb-8 uppercase fade-in-up">
+            <span className="text-white">No Login.</span>
             <br />
-            <span className="text-gradient">Just Pure API.</span>
+            <span className="text-white">No Key.</span>
+            <br />
+            <span className="text-white">Just </span>
+            <span className="text-white relative inline-block">
+              Pure
+              <span className="absolute bottom-2 left-0 w-full h-[3px] bg-red-600 -rotate-2" />
+            </span>
+            <span className="text-white"> API.</span>
           </h1>
 
-          <p className="text-base md:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed mb-12 fade-in-up" style={{ animationDelay: "0.2s" }}>
-            A production-ready API platform with 150+ endpoints.
-            No keys, no registration, no limits. Just clean, fast responses.
+          <p className="text-sm md:text-base text-gray-500 max-w-xl mx-auto leading-relaxed mb-12 fade-in-up" style={{ animationDelay: "0.2s" }}>
+            Platform REST API open-public pertama yang menghapus batasan.
+            <br />
+            <span className="text-white font-bold">Gratis selamanya</span>, tanpa registrasi, fokus pada kecepatan eksekusi kode Anda.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center fade-in-up" style={{ animationDelay: "0.3s" }}>
-            <a href="/get/documentation" className="btn-accent px-8 py-4 text-sm">
+          <div className="flex justify-center fade-in-up" style={{ animationDelay: "0.3s" }}>
+            <a href="/get/documentation" className="btn-accent px-10 py-4 text-sm">
               Go to Playground
-            </a>
-            <a href="/monitor" className="btn-ghost px-8 py-4 text-sm">
-              View Status
             </a>
           </div>
         </div>
