@@ -73,7 +73,12 @@ export function isConfigured(): boolean {
 
 export async function logApiRequest(log: Omit<ApiLog, "id" | "created_at">) {
   if (!isConfigured()) return null;
-  const { data, error } = await supabase.from("api_logs").insert(log);
+  // Strip undefined fields to avoid column mismatch
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(log)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  const { data, error } = await supabase.from("api_logs").insert(clean);
   if (error) console.error("[supabase] log error:", error.message);
   return data;
 }
