@@ -230,33 +230,36 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger">
-              {CATALOG_ITEMS.map((item, i) => (
-                <a
-                  key={i}
-                  href={item.href}
-                  className="surface-elevated rounded-lg p-6 group hover:border-white/15 transition-all duration-300 fade-in-up shimmer block"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover:border-red-500/30 transition-colors">
-                      <svg className="w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                      </svg>
+            {/* Scrolling cards */}
+            <div className="marquee-container py-2">
+              <div className="marquee-track" style={{ animationDuration: "35s" }}>
+                {[...CATALOG_ITEMS, ...CATALOG_ITEMS].map((item, i) => (
+                  <a
+                    key={i}
+                    href={item.href}
+                    className="inline-block w-[280px] flex-shrink-0 mx-3 surface-elevated rounded-lg p-6 group hover:border-white/15 transition-all duration-300 whitespace-normal"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center group-hover:border-red-500/30 transition-colors">
+                        <svg className="w-5 h-5 text-gray-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                        </svg>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {item.badges.map((b) => (
+                          <span key={b} className="text-[9px] font-bold px-2 py-1 rounded bg-white/[0.06] text-gray-500 uppercase tracking-wider border border-white/[0.08]">
+                            {b}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      {item.badges.map((b) => (
-                        <span key={b} className="text-[9px] font-bold px-2 py-1 rounded bg-white/[0.06] text-gray-500 uppercase tracking-wider border border-white/[0.08]">
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-1.5 group-hover:text-red-400 transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-gray-600">{item.desc}</p>
-                </a>
-              ))}
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-1.5 group-hover:text-red-400 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-gray-600">{item.desc}</p>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </section>
