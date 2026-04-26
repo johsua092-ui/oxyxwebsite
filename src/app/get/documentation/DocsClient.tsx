@@ -35,6 +35,7 @@ export default function DocsClient({ method }: { method: "get" | "post" }) {
   const [executing, setExecuting] = useState(false);
   const [responseTab, setResponseTab] = useState<"preview" | "headers" | "curl">("preview");
   const [copied, setCopied] = useState(false);
+  const [activeMethod, setActiveMethod] = useState<"GET" | "POST">("GET");
 
   const copyText = useCallback((text: string) => {
     try {
@@ -63,16 +64,39 @@ export default function DocsClient({ method }: { method: "get" | "post" }) {
       .finally(() => setLoading(false));
   }, [method]);
 
+  // Group endpoints by name (merge GET+POST of same endpoint)
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
     return Object.entries(routes).reduce<RouteCategory>((acc, [cat, data]) => {
-      const matched = data.endpoints.filter(
-        (ep) => ep.name.toLowerCase().includes(q) || ep.path.toLowerCase().includes(q)
-      );
-      if (matched.length > 0) acc[cat] = { endpoints: matched };
+      // Deduplicate: keep only one entry per unique name (prefer GET)
+      const seen = new Map<string, Endpoint>();
+      data.endpoints.forEach((ep) => {
+        if (ep.name.toLowerCase().includes(q) || ep.path.toLowerCase().includes(q)) {
+          const key = ep.name;
+          if (!seen.has(key) || ep.method === "GET") seen.set(key, ep);
+        }
+      });
+      const unique = Array.from(seen.values());
+      if (unique.length > 0) acc[cat] = { endpoints: unique };
       return acc;
     }, {});
   }, [routes, query]);
+
+  // Check if POST variant exists for an endpoint
+  function hasPostVariant(ep: Endpoint): boolean {
+    for (const cat of Object.values(routes)) {
+      if (cat.endpoints.some((e) => e.name === ep.name && e.method === "POST")) return true;
+    }
+    return false;
+  }
+
+  function getVariant(ep: Endpoint, method: "GET" | "POST"): Endpoint {
+    for (const cat of Object.values(routes)) {
+      const found = cat.endpoints.find((e) => e.name === ep.name && e.method === method);
+      if (found) return found;
+    }
+    return ep;
+  }
 
   const total = Object.values(filtered).reduce((n, c) => n + c.endpoints.length, 0);
 
@@ -91,44 +115,44 @@ export default function DocsClient({ method }: { method: "get" | "post" }) {
     setParams((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function executeRequest(ep: Endpoint) {
+  async function executeRequest(baseEp: Endpoint) {
     setExecuting(true);
     setResponse(null);
 
-    // Build URL with params
+    const ep = getVariant(baseEp, activeMethod);
     const paramEntries = Object.entries(params).filter(([, v]) => v.trim());
-    const queryString = paramEntries.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
-    const fullUrl = queryString ? `${ep.path}?${queryString}` : ep.path;
+    let fullUrl = ep.path;
+    let curlCmd = "";
+    const fetchOpts: RequestInit = { method: ep.method };
 
-    const curlCmd = `curl -X ${ep.method} "${window.location.origin}${fullUrl}"`;
+    if (ep.method === "POST") {
+      // POST: send params as JSON body
+      const bodyObj: Record<string, string> = {};
+      paramEntries.forEach(([k, v]) => { bodyObj[k] = v; });
+      fetchOpts.headers = { "Content-Type": "application/json" };
+      fetchOpts.body = JSON.stringify(bodyObj);
+      curlCmd = `curl -X POST "${window.location.origin}${ep.path}" -H "Content-Type: application/json" -d '${JSON.stringify(bodyObj)}'`;
+    } else {
+      // GET: send params as query string
+      const queryString = paramEntries.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+      fullUrl = queryString ? `${ep.path}?${queryString}` : ep.path;
+      curlCmd = `curl -X GET "${window.location.origin}${fullUrl}"`;
+    }
 
     try {
       const start = Date.now();
-      const res = await fetch(fullUrl);
+      const res = await fetch(fullUrl, fetchOpts);
       const elapsed = Date.now() - start;
       const body = await res.text();
 
       const headers: Record<string, string> = {};
-      res.headers.forEach((val, key) => {
-        headers[key] = val;
-      });
+      res.headers.forEach((val, key) => { headers[key] = val; });
 
-      setResponse({
-        body,
-        status: res.status,
-        statusText: res.statusText,
-        headers,
-        time: elapsed,
-        curl: curlCmd,
-      });
+      setResponse({ body, status: res.status, statusText: res.statusText, headers, time: elapsed, curl: curlCmd });
     } catch {
       setResponse({
         body: JSON.stringify({ error: "Request failed - server unreachable" }, null, 2),
-        status: 0,
-        statusText: "Network Error",
-        headers: {},
-        time: 0,
-        curl: curlCmd,
+        status: 0, statusText: "Network Error", headers: {}, time: 0, curl: curlCmd,
       });
     }
     setExecuting(false);
@@ -243,14 +267,37 @@ export default function DocsClient({ method }: { method: "get" | "post" }) {
 
                       {/* Method Toggle */}
                       <div className="flex gap-2 mb-5">
-                        <span className="text-[10px] font-bold px-3 py-1.5 bg-red-600 text-white rounded-sm">GET</span>
-                        <span className="text-[10px] font-bold px-3 py-1.5 bg-white/[0.04] text-gray-600 rounded-sm cursor-not-allowed">POST</span>
+                        <button
+                          onClick={() => {
+                            setActiveMethod("GET");
+                            setResponse(null);
+                          }}
+                          className={`text-[10px] font-bold px-3 py-1.5 rounded-sm transition-colors ${
+                            activeMethod === "GET" ? "bg-red-600 text-white" : "bg-white/[0.04] text-gray-400 hover:text-white"
+                          }`}
+                        >
+                          GET
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (hasPostVariant(ep)) {
+                              setActiveMethod("POST");
+                              setResponse(null);
+                            }
+                          }}
+                          className={`text-[10px] font-bold px-3 py-1.5 rounded-sm transition-colors ${
+                            activeMethod === "POST" ? "bg-red-600 text-white" : "bg-white/[0.04] text-gray-400"
+                          } ${!hasPostVariant(ep) ? "opacity-50 cursor-not-allowed" : "hover:text-white"}`}
+                          disabled={!hasPostVariant(ep)}
+                        >
+                          POST
+                        </button>
                       </div>
 
                       {/* Parameters */}
                       <h4 className="text-[10px] font-bold text-white uppercase tracking-widest mb-4">Request Parameters</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                        {epParams.map((p) => (
+                        {getParamsForEndpoint(getVariant(ep, activeMethod)).map((p) => (
                           <div key={p.name}>
                             <label className="text-[10px] text-gray-500 uppercase tracking-widest mb-1.5 block">
                               {p.name} {p.required && <span className="text-red-500">*</span>}

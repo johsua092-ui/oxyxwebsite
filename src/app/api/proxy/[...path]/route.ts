@@ -3,58 +3,45 @@ import { logApiRequest, incrementEndpointHits } from "@/lib/supabase";
 
 const UPSTREAM = "https://api.siputzx.my.id";
 
-/**
- * Mapping from OXYX paths to siputzx upstream paths.
- * OXYX uses /api/... while siputzx uses /api/... with different structure.
- */
-const PATH_MAP: Record<string, string> = {
-  // AI
-  "ai/duckai": "ai/duckai",
-  "ai/gita": "ai/gita",
-  "ai/metaai": "ai/metaai",
-  // Downloader
-  "d/tiktok": "d/tiktok",
-  "d/igdl": "d/igdl",
-  "d/twitter": "d/twitter",
-  "d/facebook": "d/facebook",
-  "d/spotify": "d/spotify",
-  "d/pinterest": "d/pinterest",
-  "d/snackvideo": "d/snackvideo",
-  // Search
-  "s/pinterest": "s/pinterest",
-  "s/youtube": "s/youtube",
-  // Tools
-  "tools/ssweb": "tools/ssweb",
-  "tools/translate": "tools/translate",
-  // Stalker
-  "stalk/tiktok": "stalk/tiktok",
-  "stalk/github": "stalk/github",
-};
+// All supported proxy paths
+const ALLOWED = new Set([
+  "ai/duckai", "ai/gita", "ai/metaai", "ai/gemini",
+  "d/tiktok", "d/igdl", "d/twitter", "d/facebook", "d/spotify", "d/pinterest", "d/snackvideo",
+  "s/pinterest", "s/youtube",
+  "tools/ssweb", "tools/translate",
+  "stalk/github", "stalk/tiktok",
+]);
 
 async function handleProxy(request: NextRequest, subpath: string) {
   const startTime = Date.now();
-  const searchParams = request.nextUrl.searchParams.toString();
-  const upstreamPath = PATH_MAP[subpath];
 
-  if (!upstreamPath) {
+  if (!ALLOWED.has(subpath)) {
     return NextResponse.json(
       { status: false, message: `Endpoint /api/${subpath} not found`, timestamp: new Date().toISOString() },
       { status: 404 }
     );
   }
 
-  const upstreamUrl = `${UPSTREAM}/api/${upstreamPath}${searchParams ? `?${searchParams}` : ""}`;
+  const searchParams = request.nextUrl.searchParams.toString();
+  const upstreamUrl = `${UPSTREAM}/api/${subpath}${searchParams ? `?${searchParams}` : ""}`;
 
   try {
-    const res = await fetch(upstreamUrl, {
+    const fetchOpts: RequestInit = {
       method: request.method,
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Content-Type": "application/json",
       },
-      ...(request.method === "POST" ? { body: await request.text() } : {}),
-    });
+    };
 
+    if (request.method === "POST") {
+      try {
+        const body = await request.text();
+        if (body) fetchOpts.body = body;
+      } catch { /* no body */ }
+    }
+
+    const res = await fetch(upstreamUrl, fetchOpts);
     const elapsed = Date.now() - startTime;
     const data = await res.json();
 
@@ -62,7 +49,7 @@ async function handleProxy(request: NextRequest, subpath: string) {
     logApiRequest({
       endpoint: `/api/${subpath}`,
       method: request.method,
-      status_code: res.status,
+      status_code: data.status ? 200 : (data.code || res.status),
       response_time_ms: elapsed,
       user_agent: request.headers.get("user-agent") || "unknown",
       ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
@@ -70,20 +57,23 @@ async function handleProxy(request: NextRequest, subpath: string) {
 
     incrementEndpointHits(`/api/${subpath}`).catch(() => {});
 
-    // Re-wrap in OXYX format
+    // Return as-is from siputzx (already in correct format)
+    if (data.timestamp) {
+      return NextResponse.json(data, { status: data.status ? 200 : (data.code || 500) });
+    }
+
+    // Wrap in OXYX format
     return NextResponse.json({
       status: data.status ?? true,
       data: data.data || data.result || data,
       metadata: {
         id: `req_${crypto.randomUUID().replace(/-/g, "").substring(0, 24)}`,
-        action: res.ok ? "success" : "error",
+        action: data.status ? "success" : "error",
         created: Date.now(),
-        model: subpath.split("/")[0],
         responseTime: `${elapsed}ms`,
-        upstream: upstreamPath,
       },
       timestamp: new Date().toISOString(),
-    }, { status: res.status });
+    }, { status: data.status ? 200 : (data.code || 500) });
   } catch {
     const elapsed = Date.now() - startTime;
     logApiRequest({
@@ -104,12 +94,10 @@ async function handleProxy(request: NextRequest, subpath: string) {
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
-  const subpath = path.join("/");
-  return handleProxy(request, subpath);
+  return handleProxy(request, path.join("/"));
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
-  const subpath = path.join("/");
-  return handleProxy(request, subpath);
+  return handleProxy(request, path.join("/"));
 }
