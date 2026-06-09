@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TiltCard from "@/components/TiltCard";
 import Marquee from "@/components/Marquee";
+import { SplineSceneBasic } from "@/components/ui/demo";
 
 const MARQUEE_CATEGORIES = [
   "AI", "DOWNLOADER", "SEARCH", "TOOLS", "RANDOM", "INFO", "ANIME", "GAMES",
@@ -191,6 +192,15 @@ export default function HomePage() {
           </div>
         </section>
       </RevealSection>
+
+      {/* ---- Oxyx Market (3D Spline Demo) ---- */}
+      <RevealSection>
+        <section className="py-12 px-6 max-w-6xl mx-auto">
+          <SplineSceneBasic />
+        </section>
+      </RevealSection>
+
+
 
       {/* ---- Why Choose Section ---- */}
       <RevealSection>
