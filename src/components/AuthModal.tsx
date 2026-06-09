@@ -1,7 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { auth } from '@/lib/firebase';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  updateProfile 
+} from 'firebase/auth';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -22,6 +27,23 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
   const validateGmail = (emailStr: string) => {
     return emailStr.toLowerCase().endsWith('@gmail.com');
+  };
+
+  const getFriendlyErrorMessage = (code: string, defaultMessage: string) => {
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return 'Email ini sudah terdaftar. Silakan gunakan email lain atau masuk.';
+      case 'auth/weak-password':
+        return 'Kata sandi terlalu lemah. Gunakan minimal 6 karakter.';
+      case 'auth/invalid-email':
+        return 'Format alamat email tidak valid.';
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+      case 'auth/user-not-found':
+        return 'Email atau kata sandi salah. Silakan periksa kembali.';
+      default:
+        return defaultMessage;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,53 +73,42 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
     try {
       if (isRegister) {
-        // Sign up with Supabase
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              nickname: nickname.trim(),
-            },
-          },
-        });
-
-        if (error) {
-          setErrorMsg(error.message);
-        } else {
-          setSuccessMsg('Registrasi berhasil! Silakan periksa email Anda untuk verifikasi atau masuk.');
-          // Reset form fields
-          setEmail('');
-          setNickname('');
-          setPassword('');
-          setTimeout(() => {
-            setIsRegister(false);
-            setSuccessMsg('');
-          }, 3000);
+        // Sign up with Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Update user profile display name (nickname)
+        if (userCredential.user) {
+          await updateProfile(userCredential.user, {
+            displayName: nickname.trim(),
+          });
         }
+
+        setSuccessMsg('Registrasi berhasil! Akun Anda siap digunakan.');
+        
+        // Reset form
+        setEmail('');
+        setNickname('');
+        setPassword('');
+        setTimeout(() => {
+          setIsRegister(false);
+          setSuccessMsg('');
+        }, 2000);
       } else {
-        // Sign in with Supabase
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        // Sign in with Firebase Auth
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-        if (error) {
-          setErrorMsg(error.message);
-        } else {
-          setSuccessMsg('Berhasil masuk!');
-          if (onSuccess && data.user) {
-            onSuccess(data.user);
-          }
-          setTimeout(() => {
-            onClose();
-            // Optional: trigger full page update
-            window.location.reload();
-          }, 1000);
+        setSuccessMsg('Berhasil masuk!');
+        if (onSuccess && userCredential.user) {
+          onSuccess(userCredential.user);
         }
+        setTimeout(() => {
+          onClose();
+          // Reload to update navbar state
+          window.location.reload();
+        }, 1000);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Terjadi kesalahan sistem.');
+      setErrorMsg(getFriendlyErrorMessage(err.code, err.message || 'Terjadi kesalahan sistem.'));
     } finally {
       setLoading(false);
     }
@@ -119,7 +130,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
         <div className="flex justify-between items-center mb-6 relative z-10">
           <h2 className="text-xl font-black text-white uppercase tracking-wider">
-            {isRegister ? 'Register Akun' : 'Masuk Ke OXYX'}
+            {isRegister ? 'Register Akun (Firebase)' : 'Masuk Ke OXYX (Firebase)'}
           </h2>
           <button 
             onClick={onClose} 

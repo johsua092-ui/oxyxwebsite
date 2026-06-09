@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import AuthModal from "@/components/AuthModal";
 
 const NAV_LINKS = [
@@ -25,28 +26,23 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // Ambil session saat ini
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    // Dengarkan perubahan state auth dari Firebase
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
     });
 
-    // Dengarkan perubahan state auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
     setUser(null);
     window.location.reload();
   };
 
   const getDisplayName = () => {
     if (!user) return "";
-    return user.user_metadata?.nickname || user.email?.split("@")[0];
+    return user.displayName || user.email?.split("@")[0];
   };
 
   return (
@@ -168,4 +164,5 @@ export default function Navbar() {
     </>
   );
 }
+
 
